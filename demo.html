@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<style>
+    #box {
+        width: 400px;
+        height: 400px;
+        position: relative;
+        border: solid 1px;
+    }
+
+    #item {
+        width: 11px;
+        height: 11px;
+        background: black;
+        position: absolute;
+    }
+
+    #snake {
+        width: 9px;
+        height: 9px;
+        border: solid 1px black;
+        position: absolute;
+    }
+</style>
+<body>
+<div id="box">
+
+</div>
+</body>
+<script>
+
+  class Item {
+    constructor(x = 0, y = 0) {
+      this.width = 10
+      this.height = 10
+      this.x = x
+      this.y = y
+      this.box = document.getElementById('box')
+      this.item = document.createElement('div')
+    }
+
+    getRandomNumber(min, max, num) {
+      let random = (min + Math.round(Math.random() * (max - min)))
+      let randomNumber = num ? random.toFixed(num) : random
+      return randomNumber * 10
+    }
+
+    createItemPosition() {
+      let width = this.getRandomNumber(0, this.box.offsetWidth / this.width, 0) - this.width
+      let height = this.getRandomNumber(0, this.box.offsetHeight / this.height, 0) - this.width
+      this.x = parseInt(width)
+      this.y = parseInt(height)
+    }
+
+    createItem() {
+      this.createItemPosition()
+      this.item.id = 'item'
+      this.item.style.top = this.y + 'px'
+      this.item.style.left = this.x + 'px'
+      return this.item
+    }
+  }
+
+  const $item = new Item()
+
+  class Black {
+    constructor() {
+      this.box = document.getElementById('box')
+      this.createItem()
+    }
+
+    createItem() {
+      let list = this.box.querySelectorAll('#item')
+      if (list.length === 0) {
+        this.box.appendChild($item.createItem())
+      }
+    }
+  }
+
+  const $box = new Black()
+
+  class Snake {
+    constructor() {
+      this.box = document.getElementById('box')
+      this.Over = false
+      this.snakeList = []
+      this.actions = 'ArrowRight'
+      this.createSnake()
+      this.displayInt()
+      this.autoTime()
+      this.speed = 500
+      window.addEventListener('keyup', (event) => {
+        if (this.actions !== event.code) {
+          if (event.code === 'ArrowRight' && this.actions === 'ArrowLeft') return
+          if (event.code === 'ArrowLeft' && this.actions === 'ArrowRight') return
+          if (event.code === 'ArrowUp' && this.actions === 'ArrowDown') return
+          if (event.code === 'ArrowDown' && this.actions === 'ArrowUp') return
+          this.actions = event.code
+        }
+      })
+    }
+
+    createBlock(left, top, id) {
+      let item = document.createElement('div')
+      item.style.left = left + 'px'
+      item.x = left
+
+      item.style.top = top + 'px'
+      item.y = top
+
+      item.id = 'snake'
+      item.key = id
+      return item
+    }
+
+    createSnake() {
+      for (let n = 1; n <= 3; n++) {
+        let item = this.createBlock(10 * n, 10, n)
+        this.snakeList.push(item)
+      }
+    }
+
+    displayInt() {
+      this.snakeList.forEach(val => {
+        this.box.appendChild(val)
+      })
+    }
+
+    autoTime() {
+      this.animals()
+      this.displayInt()
+      if (this.Over) return
+      setTimeout(this.autoTime.bind(this), this.speed)
+    }
+
+    addItem() {
+      this.snakeList.sort((a, b) => a.key - b.key)
+      let item = this.snakeList[0]
+      let newItem
+      if (this.actions === 'ArrowLeft') {
+        newItem = this.createBlock(item.x + 10, item.y, item.key - 1)
+      } else if (this.actions === 'ArrowRight') {
+        newItem = this.createBlock(item.x - 10, item.y, item.key - 1)
+      } else if (this.actions === 'ArrowDown') {
+        newItem = this.createBlock(item.x, item.y + 10, item.key - 1)
+      } else if (this.actions === 'ArrowUp') {
+        newItem = this.createBlock(item.x, item.y - 10, item.key - 1)
+      }
+
+      this.snakeList.push(newItem)
+    }
+
+    isEat(item) {
+      if ($item.x === item.x && $item.y === item.y) {
+        $box.box.removeChild($item.item)
+        $box.createItem()
+        this.addItem()
+      }
+    }
+
+    animals() {
+      this.snakeList.sort((a, b) => b.key - a.key)
+      let x = 0
+      let y = 0
+      this.snakeList.forEach((item, index) => {
+        if (index === 0) {
+          x = item.x
+          y = item.y
+          if (this.actions == 'ArrowRight' || this.actions == '') {
+            item.x += 10
+          } else if (this.actions == 'ArrowUp') {
+            item.y -= 10
+          } else if (this.actions == 'ArrowLeft') {
+            item.x -= 10
+          } else if (this.actions == 'ArrowDown') {
+            item.y += 10
+          }
+          item.style.left = item.x + 'px'
+          item.style.top = item.y + 'px'
+          if (item.x > 400 || item.x < 0 || item.y > 400 || item.y < 0) {
+            alert('game over')
+            this.Over = true
+            return
+          }
+          this.isEat(item)
+        } else {
+          let x1 = item.x
+          let y1 = item.y
+          item.x = x
+          item.y = y
+          item.style.left = x + 'px'
+          item.style.top = y + 'px'
+          x = x1
+          y = y1
+        }
+      })
+    }
+  }
+
+  new Snake()
+
+</script>
+
+
+</html>
