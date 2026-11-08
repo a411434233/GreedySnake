@@ -1,0 +1,7 @@
+# Browser verification screenshots and temporary traces.
+/output/
+
+# Local dependencies and OS metadata.
+/node_modules/
+.DS_Store
+Thumbs.db
